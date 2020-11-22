@@ -11,6 +11,7 @@ import org.junit.Test;
 public class EmployeePayrollJDBCServiceTest {
 
 	static EmployeePayrollJDBCService employeePayrollJDBCService;
+	List<EmployeePayrollData> employeePayrollData;
 
 	@BeforeClass
 	public static void createObj() {
@@ -23,11 +24,21 @@ public class EmployeePayrollJDBCServiceTest {
 	}
 
 	@Test
-	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchTotalEmployeeCount() {
-		List<EmployeePayrollData> employeePayrollData = employeePayrollJDBCService
+	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchTotalEmployeeCount() throws PayrollServiceException {
+		employeePayrollData = employeePayrollJDBCService
 				.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertEquals(4, employeePayrollData.size());
 		System.out.println("Total employee in employee payroll database :" + employeePayrollData.size());
+	}
+
+	@Test
+	public void givenEmployeeSalary_WhenUpdated_ShouldMatch() throws PayrollServiceException {
+		employeePayrollData = employeePayrollJDBCService
+				.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		employeePayrollJDBCService.updateEmployeeSalary("Terrisa", 3000000.00);
+		boolean result = employeePayrollJDBCService.checkEmployeePayrollSyncWithDB("Terrisa");
+		assertTrue(result);
+		System.out.println("Salary got updated for Terrisa.");
 	}
 
 }
