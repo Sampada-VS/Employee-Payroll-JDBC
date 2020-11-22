@@ -223,6 +223,7 @@ public class EmployeePayrollDBService {
 		EmployeePayrollData employeePayrollData = null;
 		try {
 			connection = getConnect();
+			connection.setAutoCommit(false);
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
 		}
@@ -237,7 +238,12 @@ public class EmployeePayrollDBService {
 					employeeId = resultSet.getInt(1);
 			}
 		} catch (SQLException e) {
-			throw new PayrollServiceException(e.getMessage());
+			try {
+				connection.rollback();
+				return employeePayrollData;
+			} catch (SQLException e1) {
+				throw new PayrollServiceException(e1.getMessage());
+			}
 		}
 		try (Statement statement = connection.createStatement()) {
 			double deductions = salary * 0.2;
@@ -251,7 +257,24 @@ public class EmployeePayrollDBService {
 			if (rowAffected == 1)
 				employeePayrollData = new EmployeePayrollData(employeeId, name, salary, startDate);
 		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				throw new PayrollServiceException(e1.getMessage());
+			}
 			throw new PayrollServiceException(e.getMessage());
+		}
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		} finally {
+			if (connection != null)
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					throw new PayrollServiceException(e.getMessage());
+				}
 		}
 		return employeePayrollData;
 	}

@@ -105,6 +105,6 @@ public class EmployeePayrollJDBCServiceTest {
 		employeePayrollJDBCService.addEmployeeToPayroll("Gunjan", 4000000.00, LocalDate.now(), "F");
 		boolean result = employeePayrollJDBCService.checkEmployeePayrollSyncWithDB("Gunjan");
 		assertTrue(result);
-		System.out.println("Employee added and simultaneously payroll details are added.");
+		System.out.println("Employee added and simultaneously payroll details are added by handling transactions.");
 	}
 }
