@@ -2,6 +2,7 @@ package com.blz.payrolljdbc;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class EmployeePayrollJDBCService {
 	public enum IOService {
@@ -48,8 +49,38 @@ public class EmployeePayrollJDBCService {
 
 	public List<EmployeePayrollData> readEmployeePayrollForDateRange(IOService ioService, LocalDate startDate,
 			LocalDate endDate) throws PayrollServiceException {
-		if(ioService.equals(IOService.DB_IO))
-			return employeePayrollDBService.getEmployeePayrollForDateRange(startDate,endDate);
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getEmployeePayrollForDateRange(startDate, endDate);
+		return null;
+	}
+
+	public Map<String, Double> readAverageSalaryByGender(IOService ioService) throws PayrollServiceException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getAverageSalaryByGender();
+		return null;
+	}
+
+	public Map<String, Double> readSumSalaryByGender(IOService ioService) throws PayrollServiceException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getSumSalaryByGender();
+		return null;
+	}
+
+	public Map<String, Double> readMinSalaryByGender(IOService ioService) throws PayrollServiceException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getMinSalaryByGender();
+		return null;
+	}
+
+	public Map<String, Double> readMaxSalaryByGender(IOService ioService) throws PayrollServiceException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getMaxSalaryByGender();
+		return null;
+	}
+
+	public Map<String, Integer> readEmployeeByGender(IOService ioService) throws PayrollServiceException {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getEmployeeCountByGender();
 		return null;
 	}
 

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -52,4 +53,56 @@ public class EmployeePayrollJDBCServiceTest {
 		assertEquals(3, employeePayrollData.size());
 		System.out.println("Employee count match for given date range.");
 	}
+
+	@Test
+	public void givenEmployeePayroll_WhenSumOfSalaryRetrievedByGender_ShouldReturnProperValue()
+			throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		Map<String, Double> sumOfSalaryByGender = employeePayrollJDBCService
+				.readSumSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
+		assertTrue(sumOfSalaryByGender.get("F").equals(7000000.00) && sumOfSalaryByGender.get("M").equals(4000000.00));
+		System.out.println("Total salary value by gender matched with database.");
+	}
+
+	@Test
+	public void givenEmployeePayroll_WhenAverageSalaryRetrievedByGender_ShouldReturnProperValue()
+			throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		Map<String, Double> averageSalaryByGender = employeePayrollJDBCService
+				.readAverageSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
+		assertTrue(
+				averageSalaryByGender.get("F").equals(3500000.00) && averageSalaryByGender.get("M").equals(2000000.00));
+		System.out.println("Average salary value by gender matched with database.");
+	}
+
+	@Test
+	public void givenEmployeePayroll_WhenMinimumOfSalaryRetrievedByGender_ShouldReturnProperValue()
+			throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		Map<String, Double> minSalaryByGender = employeePayrollJDBCService
+				.readMinSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
+		assertTrue(minSalaryByGender.get("F").equals(3000000.00) && minSalaryByGender.get("M").equals(1000000.00));
+		System.out.println("Minimum salary value by gender matched with database.");
+	}
+
+	@Test
+	public void givenEmployeePayroll_WhenMaximumOfSalaryRetrievedByGender_ShouldReturnProperValue()
+			throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		Map<String, Double> maxSalaryByGender = employeePayrollJDBCService
+				.readMaxSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
+		assertTrue(maxSalaryByGender.get("F").equals(4000000.00) && maxSalaryByGender.get("M").equals(3000000.00));
+		System.out.println("Maximum salary value by gender matched with database.");
+	}
+
+	@Test
+	public void givenEmployeePayroll_WhenCountOfEmployeeRetrievedByGender_ShouldReturnProperValue()
+			throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		Map<String, Integer> countEmployeeByGender = employeePayrollJDBCService
+				.readEmployeeByGender(EmployeePayrollJDBCService.IOService.DB_IO);
+		assertTrue(countEmployeeByGender.get("F").equals(2) && countEmployeeByGender.get("M").equals(2));
+		System.out.println("Count of employee value by gender matched with database.");
+	}
+
 }

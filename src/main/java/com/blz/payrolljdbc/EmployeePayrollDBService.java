@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.sql.Connection;
 import java.sql.Date;
@@ -139,4 +141,56 @@ public class EmployeePayrollDBService {
 		return employeePayrollList;
 	}
 
+	public Map<String, Double> getSumSalaryByGender() throws PayrollServiceException {
+		String sql = "SELECT Gender,SUM(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		return this.getGenderToSalaryMap(sql);
+	}
+
+	public Map<String, Double> getAverageSalaryByGender() throws PayrollServiceException {
+		String sql = "SELECT Gender,AVG(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		return this.getGenderToSalaryMap(sql);
+	}
+
+	public Map<String, Double> getMinSalaryByGender() throws PayrollServiceException {
+		String sql = "SELECT Gender,MIN(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		return this.getGenderToSalaryMap(sql);
+	}
+
+	public Map<String, Double> getMaxSalaryByGender() throws PayrollServiceException {
+		String sql = "SELECT Gender,MAX(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		return this.getGenderToSalaryMap(sql);
+	}
+
+	private Map<String, Double> getGenderToSalaryMap(String sql) throws PayrollServiceException {
+		Map<String, Double> genderToAverageSalaryMap = new HashMap<>();
+		try (Connection connection = getConnect()) {
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			while (result.next()) {
+				String gender = result.getString("Gender");
+				double salary = result.getDouble("functionSalary");
+				genderToAverageSalaryMap.put(gender, salary);
+			}
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		}
+		return genderToAverageSalaryMap;
+	}
+
+	public Map<String, Integer> getEmployeeCountByGender() throws PayrollServiceException {
+		String sql = "SELECT Gender,COUNT(EmployeeName) FROM employee_payroll GROUP BY Gender;";
+		Map<String, Integer> genderToAverageSalaryMap = new HashMap<>();
+		try (Connection connection = getConnect()) {
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			while (result.next()) {
+				String gender = result.getString("Gender");
+				Integer count = result.getInt("COUNT(EmployeeName)");
+				genderToAverageSalaryMap.put(gender, count);
+			}
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		}
+		return genderToAverageSalaryMap;
+	}
 }
