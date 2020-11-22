@@ -84,7 +84,8 @@ public class EmployeePayrollJDBCService {
 		return null;
 	}
 
-	public void addEmployeeToPayroll(String name, double salary, LocalDate startDate, String gender) throws PayrollServiceException {
+	public void addEmployeeToPayroll(String name, double salary, LocalDate startDate, String gender)
+			throws PayrollServiceException {
 		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name, salary, startDate, gender));
 	}
 
