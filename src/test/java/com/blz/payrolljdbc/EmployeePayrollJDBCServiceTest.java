@@ -2,6 +2,7 @@ package com.blz.payrolljdbc;
 
 import static org.junit.Assert.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -41,4 +42,14 @@ public class EmployeePayrollJDBCServiceTest {
 		System.out.println("Salary got updated for Terrisa.");
 	}
 
+	@Test
+	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() throws PayrollServiceException {
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		LocalDate startDate = LocalDate.of(2019, 01, 01);
+		LocalDate endDate = LocalDate.now();
+		employeePayrollData = employeePayrollJDBCService
+				.readEmployeePayrollForDateRange(EmployeePayrollJDBCService.IOService.DB_IO, startDate, endDate);
+		assertEquals(3, employeePayrollData.size());
+		System.out.println("Employee count match for given date range.");
+	}
 }

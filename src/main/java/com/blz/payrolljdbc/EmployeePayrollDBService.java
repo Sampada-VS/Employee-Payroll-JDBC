@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.sql.Connection;
+import java.sql.Date;
 
 public class EmployeePayrollDBService {
 	private static EmployeePayrollDBService employeePayrollDBService;
@@ -50,15 +51,7 @@ public class EmployeePayrollDBService {
 
 	public List<EmployeePayrollData> readData() throws PayrollServiceException {
 		String sql = "SELECT * FROM employee_payroll;";
-		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		try (Connection connection = getConnect()) {
-			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery(sql);
-			employeePayrollList = this.getEmployeeData(result);
-		} catch (SQLException e) {
-			throw new PayrollServiceException(e.getMessage());
-		}
-		return employeePayrollList;
+		return this.getEmployeePayrollDataUsingDB(sql);
 	}
 
 	public List<EmployeePayrollData> getEmployeeData(String name) throws PayrollServiceException {
@@ -125,6 +118,25 @@ public class EmployeePayrollDBService {
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
 		}
+	}
+
+	public List<EmployeePayrollData> getEmployeePayrollForDateRange(LocalDate startDate, LocalDate endDate)
+			throws PayrollServiceException {
+		String sql = String.format("SELECT * FROM employee_payroll WHERE StartDate BETWEEN '%s' AND '%s';",
+				Date.valueOf(startDate), Date.valueOf(endDate));
+		return this.getEmployeePayrollDataUsingDB(sql);
+	}
+
+	private List<EmployeePayrollData> getEmployeePayrollDataUsingDB(String sql) throws PayrollServiceException {
+		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+		try (Connection connection = getConnect()) {
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			employeePayrollList = this.getEmployeeData(result);
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		}
+		return employeePayrollList;
 	}
 
 }

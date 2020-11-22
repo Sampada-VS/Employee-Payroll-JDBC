@@ -1,5 +1,6 @@
 package com.blz.payrolljdbc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class EmployeePayrollJDBCService {
@@ -43,6 +44,13 @@ public class EmployeePayrollJDBCService {
 	public boolean checkEmployeePayrollSyncWithDB(String name) throws PayrollServiceException {
 		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeeData(name);
 		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
+	}
+
+	public List<EmployeePayrollData> readEmployeePayrollForDateRange(IOService ioService, LocalDate startDate,
+			LocalDate endDate) throws PayrollServiceException {
+		if(ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getEmployeePayrollForDateRange(startDate,endDate);
+		return null;
 	}
 
 }
