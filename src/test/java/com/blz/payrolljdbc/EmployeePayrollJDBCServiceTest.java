@@ -16,8 +16,9 @@ public class EmployeePayrollJDBCServiceTest {
 	List<EmployeePayrollData> employeePayrollData;
 
 	@BeforeClass
-	public static void createObj() {
+	public static void createObj() throws PayrollServiceException {
 		employeePayrollJDBCService = new EmployeePayrollJDBCService();
+		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 	}
 
 	@AfterClass
@@ -45,7 +46,6 @@ public class EmployeePayrollJDBCServiceTest {
 
 	@Test
 	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		LocalDate startDate = LocalDate.of(2019, 01, 01);
 		LocalDate endDate = LocalDate.now();
 		employeePayrollData = employeePayrollJDBCService
@@ -57,7 +57,6 @@ public class EmployeePayrollJDBCServiceTest {
 	@Test
 	public void givenEmployeePayroll_WhenSumOfSalaryRetrievedByGender_ShouldReturnProperValue()
 			throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		Map<String, Double> sumOfSalaryByGender = employeePayrollJDBCService
 				.readSumSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertTrue(sumOfSalaryByGender.get("F").equals(7000000.00) && sumOfSalaryByGender.get("M").equals(4000000.00));
@@ -67,7 +66,6 @@ public class EmployeePayrollJDBCServiceTest {
 	@Test
 	public void givenEmployeePayroll_WhenAverageSalaryRetrievedByGender_ShouldReturnProperValue()
 			throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		Map<String, Double> averageSalaryByGender = employeePayrollJDBCService
 				.readAverageSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertTrue(
@@ -78,7 +76,6 @@ public class EmployeePayrollJDBCServiceTest {
 	@Test
 	public void givenEmployeePayroll_WhenMinimumOfSalaryRetrievedByGender_ShouldReturnProperValue()
 			throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		Map<String, Double> minSalaryByGender = employeePayrollJDBCService
 				.readMinSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertTrue(minSalaryByGender.get("F").equals(3000000.00) && minSalaryByGender.get("M").equals(1000000.00));
@@ -88,7 +85,6 @@ public class EmployeePayrollJDBCServiceTest {
 	@Test
 	public void givenEmployeePayroll_WhenMaximumOfSalaryRetrievedByGender_ShouldReturnProperValue()
 			throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		Map<String, Double> maxSalaryByGender = employeePayrollJDBCService
 				.readMaxSalaryByGender(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertTrue(maxSalaryByGender.get("F").equals(4000000.00) && maxSalaryByGender.get("M").equals(3000000.00));
@@ -98,11 +94,16 @@ public class EmployeePayrollJDBCServiceTest {
 	@Test
 	public void givenEmployeePayroll_WhenCountOfEmployeeRetrievedByGender_ShouldReturnProperValue()
 			throws PayrollServiceException {
-		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
 		Map<String, Integer> countEmployeeByGender = employeePayrollJDBCService
 				.readEmployeeByGender(EmployeePayrollJDBCService.IOService.DB_IO);
 		assertTrue(countEmployeeByGender.get("F").equals(2) && countEmployeeByGender.get("M").equals(2));
 		System.out.println("Count of employee value by gender matched with database.");
 	}
 
+	@Test
+	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws PayrollServiceException {
+		employeePayrollJDBCService.addEmployeeToPayroll("Gunjan", 4000000.00, LocalDate.now(), "F");
+		boolean result = employeePayrollJDBCService.checkEmployeePayrollSyncWithDB("Gunjan");
+		assertTrue(result);
+	}
 }
