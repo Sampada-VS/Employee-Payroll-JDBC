@@ -91,4 +91,11 @@ public class EmployeePayrollJDBCService {
 				.add(employeePayrollDBService.addEmployeeToPayroll(name, department, gender, salary, startDate));
 	}
 
+	public void deleteEmployee(String name) throws PayrollServiceException {
+		int result = employeePayrollDBService.deleteEmployeeData(name);
+		if (result == 0)
+			return;
+
+	}
+
 }

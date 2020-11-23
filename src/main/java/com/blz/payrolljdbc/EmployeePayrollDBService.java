@@ -54,7 +54,7 @@ public class EmployeePayrollDBService {
 	}
 
 	public List<EmployeePayrollData> readData() throws PayrollServiceException {
-		String sql = "SELECT * FROM employee_payroll;";
+		String sql = "SELECT * FROM employee_payroll WHERE is_Active=1;";
 		return this.getEmployeePayrollDataUsingDB(sql);
 	}
 
@@ -93,7 +93,7 @@ public class EmployeePayrollDBService {
 	private void preparedStatementForEmployeeData() throws PayrollServiceException {
 		try {
 			Connection connection = getConnect();
-			String sql = "SELECT * FROM employee_payroll WHERE EmployeeName=?";
+			String sql = "SELECT * FROM employee_payroll WHERE EmployeeName=? AND is_Active=1";
 			employeeDataStatement = connection.prepareStatement(sql);
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
@@ -106,7 +106,7 @@ public class EmployeePayrollDBService {
 
 	private int updateEmployeeDataUsingPreparedStatement(String name, double salary) throws PayrollServiceException {
 		try (Connection connection = getConnect()) {
-			String sql = "UPDATE employee_payroll SET Salary=? WHERE EmployeeName=?";
+			String sql = "UPDATE employee_payroll SET Salary=? WHERE EmployeeName=? AND is_Active=1";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setDouble(1, salary);
 			preparedStatement.setString(2, name);
@@ -126,9 +126,20 @@ public class EmployeePayrollDBService {
 		}
 	}
 
+	public int deleteEmployeeData(String name) throws PayrollServiceException {
+		String sql = String.format("UPDATE employee_payroll SET is_Active=0 WHERE EmployeeName='%s';", name);
+		try (Connection connection = getConnect()) {
+			Statement statement = connection.createStatement();
+			return statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		}
+	}
+
 	public List<EmployeePayrollData> getEmployeePayrollForDateRange(LocalDate startDate, LocalDate endDate)
 			throws PayrollServiceException {
-		String sql = String.format("SELECT * FROM employee_payroll WHERE StartDate BETWEEN '%s' AND '%s';",
+		String sql = String.format(
+				"SELECT * FROM employee_payroll WHERE StartDate BETWEEN '%s' AND '%s' AND is_Active=1;",
 				Date.valueOf(startDate), Date.valueOf(endDate));
 		return this.getEmployeePayrollDataUsingDB(sql);
 	}
@@ -146,22 +157,22 @@ public class EmployeePayrollDBService {
 	}
 
 	public Map<String, Double> getSumSalaryByGender() throws PayrollServiceException {
-		String sql = "SELECT Gender,SUM(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		String sql = "SELECT Gender,SUM(Salary) as functionSalary FROM employee_payroll WHERE is_Active=1 GROUP BY Gender;";
 		return this.getGenderToSalaryMap(sql);
 	}
 
 	public Map<String, Double> getAverageSalaryByGender() throws PayrollServiceException {
-		String sql = "SELECT Gender,AVG(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		String sql = "SELECT Gender,AVG(Salary) as functionSalary FROM employee_payroll  WHERE is_Active=1 GROUP BY Gender;";
 		return this.getGenderToSalaryMap(sql);
 	}
 
 	public Map<String, Double> getMinSalaryByGender() throws PayrollServiceException {
-		String sql = "SELECT Gender,MIN(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		String sql = "SELECT Gender,MIN(Salary) as functionSalary FROM employee_payroll  WHERE is_Active=1 GROUP BY Gender;";
 		return this.getGenderToSalaryMap(sql);
 	}
 
 	public Map<String, Double> getMaxSalaryByGender() throws PayrollServiceException {
-		String sql = "SELECT Gender,MAX(Salary) as functionSalary FROM employee_payroll GROUP BY Gender;";
+		String sql = "SELECT Gender,MAX(Salary) as functionSalary FROM employee_payroll  WHERE is_Active=1 GROUP BY Gender;";
 		return this.getGenderToSalaryMap(sql);
 	}
 
@@ -182,7 +193,7 @@ public class EmployeePayrollDBService {
 	}
 
 	public Map<String, Integer> getEmployeeCountByGender() throws PayrollServiceException {
-		String sql = "SELECT Gender,COUNT(EmployeeName) FROM employee_payroll GROUP BY Gender;";
+		String sql = "SELECT Gender,COUNT(EmployeeName) FROM employee_payroll  WHERE is_Active=1 GROUP BY Gender;";
 		Map<String, Integer> genderToAverageSalaryMap = new HashMap<>();
 		try (Connection connection = getConnect()) {
 			Statement statement = connection.createStatement();
@@ -282,4 +293,5 @@ public class EmployeePayrollDBService {
 		}
 		return employeePayrollData;
 	}
+
 }
