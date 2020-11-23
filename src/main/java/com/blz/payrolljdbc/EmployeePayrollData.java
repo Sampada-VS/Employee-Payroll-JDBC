@@ -7,8 +7,8 @@ public class EmployeePayrollData {
 	public String name;
 	public double salary;
 	public LocalDate startDate;
-	public String[] department;
-	public char gender;
+	public String department;
+	public String gender;
 
 	public EmployeePayrollData(int id, String name, double salary, LocalDate startDate) {
 		this.id = id;
@@ -16,10 +16,12 @@ public class EmployeePayrollData {
 		this.salary = salary;
 		this.startDate = startDate;
 	}
-	public EmployeePayrollData(int id, String name,String[] department,char gender, double salary, LocalDate startDate) {
+
+	public EmployeePayrollData(int id, String name, String department, String gender, double salary,
+			LocalDate startDate) {
 		this(id, name, salary, startDate);
-		this.department=department;
-		this.gender=gender;
+		this.department = department;
+		this.gender = gender;
 	}
 
 	@Override
@@ -29,6 +31,7 @@ public class EmployeePayrollData {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		EmployeePayrollData that = (EmployeePayrollData) o;
-		return id == that.id && Double.compare(that.salary, salary) == 0 && name.equals(that.name);
+		return id == that.id && Double.compare(that.salary, salary) == 0 && name.equals(that.name)
+				&& department.equals(that.department) && gender.equals(that.gender);
 	}
 }

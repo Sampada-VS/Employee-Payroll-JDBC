@@ -102,7 +102,7 @@ public class EmployeePayrollJDBCServiceTest {
 
 	@Test
 	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws PayrollServiceException {
-		employeePayrollJDBCService.addEmployeeToPayroll("Gunjan", 4000000.00, LocalDate.now(), "F");
+		employeePayrollJDBCService.addEmployeeToPayroll("Gunjan","Sales","F", 4000000.00, LocalDate.now());
 		boolean result = employeePayrollJDBCService.checkEmployeePayrollSyncWithDB("Gunjan");
 		assertTrue(result);
 		System.out.println("Employee added and simultaneously payroll details are added by handling transactions.");

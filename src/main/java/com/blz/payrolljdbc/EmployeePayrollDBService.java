@@ -2,6 +2,7 @@ package com.blz.payrolljdbc;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.Date;
 
@@ -76,9 +78,11 @@ public class EmployeePayrollDBService {
 			while (resultSet.next()) {
 				int id = resultSet.getInt("EmployeeId");
 				String name = resultSet.getString("EmployeeName");
+				String department = resultSet.getString("Department");
+				String gender = resultSet.getString("Gender");
 				double salary = resultSet.getDouble("Salary");
 				LocalDate startDate = resultSet.getDate("StartDate").toLocalDate();
-				employeePayrollList.add(new EmployeePayrollData(id, name, salary, startDate));
+				employeePayrollList.add(new EmployeePayrollData(id, name, department, gender, salary, startDate));
 			}
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
@@ -216,8 +220,8 @@ public class EmployeePayrollDBService {
 		return employeePayrollData;
 	}
 
-	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, LocalDate startDate, String gender)
-			throws PayrollServiceException {
+	public EmployeePayrollData addEmployeeToPayroll(String name, String department, String gender, double salary,
+			LocalDate startDate) throws PayrollServiceException {
 		int employeeId = -1;
 		Connection connection = null;
 		EmployeePayrollData employeePayrollData = null;
@@ -229,8 +233,8 @@ public class EmployeePayrollDBService {
 		}
 		try (Statement statement = connection.createStatement()) {
 			String sql = String.format(
-					"INSERT INTO employee_payroll (EmployeeName,Gender,Salary,StartDate) VALUES ('%s','%s','%s','%s')",
-					name, gender, salary, Date.valueOf(startDate));
+					"INSERT INTO employee_payroll (EmployeeName,Department,Gender,Salary,StartDate) VALUES ('%s','%s','%s',%.2f,'%s')",
+					name, department, gender, salary, Date.valueOf(startDate));
 			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1) {
 				ResultSet resultSet = statement.getGeneratedKeys();
@@ -255,7 +259,7 @@ public class EmployeePayrollDBService {
 					employeeId, salary, deductions, taxablePay, incomeTax, netPay);
 			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
 			if (rowAffected == 1)
-				employeePayrollData = new EmployeePayrollData(employeeId, name, salary, startDate);
+				employeePayrollData = new EmployeePayrollData(employeeId, name, department, gender, salary, startDate);
 		} catch (SQLException e) {
 			try {
 				connection.rollback();

@@ -1,5 +1,6 @@
 package com.blz.payrolljdbc;
 
+import java.sql.Array;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -84,9 +85,10 @@ public class EmployeePayrollJDBCService {
 		return null;
 	}
 
-	public void addEmployeeToPayroll(String name, double salary, LocalDate startDate, String gender)
+	public void addEmployeeToPayroll(String name, String department, String gender, double salary, LocalDate startDate)
 			throws PayrollServiceException {
-		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name, salary, startDate, gender));
+		employeePayrollList
+				.add(employeePayrollDBService.addEmployeeToPayroll(name, department, gender, salary, startDate));
 	}
 
 }
