@@ -89,12 +89,28 @@ public class EmployeePayrollJDBCService {
 		employeePayrollList
 				.add(employeePayrollDBService.addEmployeeToPayroll(name, department, gender, salary, startDate));
 	}
-
+	public void addEmployeeToPayroll(List<EmployeePayrollData> employeePayrollDataList) {
+		employeePayrollDataList.forEach(employeePayrollData -> {
+			System.out.println("Employee being added:"+employeePayrollData.name);
+			try {
+				this.addEmployeeToPayroll(employeePayrollData.name, employeePayrollData.department, employeePayrollData.gender, 
+							employeePayrollData.salary, employeePayrollData.startDate);
+			} catch (PayrollServiceException e) {
+				e.printStackTrace();
+			}			
+			System.out.println("Employee Added :"+employeePayrollData.name);
+		});
+	}
+	
 	public void deleteEmployee(String name) throws PayrollServiceException {
 		int result = employeePayrollDBService.deleteEmployeeData(name);
 		if (result == 0)
 			return;
 
+	}
+
+	public long countEntries(IOService ioService) {
+		return employeePayrollList.size();
 	}
 
 }
