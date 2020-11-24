@@ -1,6 +1,7 @@
 package com.blz.payrolljdbc;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class EmployeePayrollData {
 	public int id;
@@ -24,6 +25,11 @@ public class EmployeePayrollData {
 		this.gender = gender;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(name,department,gender, salary, startDate);
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)

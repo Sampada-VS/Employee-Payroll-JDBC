@@ -1,6 +1,7 @@
 package com.blz.payrolljdbc;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,19 +90,46 @@ public class EmployeePayrollJDBCService {
 		employeePayrollList
 				.add(employeePayrollDBService.addEmployeeToPayroll(name, department, gender, salary, startDate));
 	}
+
 	public void addEmployeeToPayroll(List<EmployeePayrollData> employeePayrollDataList) {
 		employeePayrollDataList.forEach(employeePayrollData -> {
-			System.out.println("Employee being added:"+employeePayrollData.name);
+			System.out.println("Employee being added:" + employeePayrollData.name);
 			try {
-				this.addEmployeeToPayroll(employeePayrollData.name, employeePayrollData.department, employeePayrollData.gender, 
-							employeePayrollData.salary, employeePayrollData.startDate);
+				addEmployeeToPayroll(employeePayrollData.name, employeePayrollData.department,
+						employeePayrollData.gender, employeePayrollData.salary, employeePayrollData.startDate);
 			} catch (PayrollServiceException e) {
 				e.printStackTrace();
-			}			
-			System.out.println("Employee Added :"+employeePayrollData.name);
+			}
+			System.out.println("Employee Added :" + employeePayrollData.name);
 		});
 	}
-	
+
+	public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollDataList) {
+		Map<Integer, Boolean> employeeAdditionStatus = new HashMap<Integer, Boolean>();
+		employeePayrollDataList.forEach(employeeData -> {
+			Runnable task = () -> {
+				employeeAdditionStatus.put(employeeData.hashCode(), false);
+				System.out.println("Employee being added:" + Thread.currentThread().getName());
+				try {
+					this.addEmployeeToPayroll(employeeData.name, employeeData.department,
+							employeeData.gender, employeeData.salary, employeeData.startDate);
+				} catch (PayrollServiceException e) {
+					e.printStackTrace();
+				}
+				employeeAdditionStatus.put(employeeData.hashCode(), true);
+				System.out.println("Employee Added :" + Thread.currentThread().getName());
+			};
+			Thread thread = new Thread(task, employeeData.name);
+			thread.start();
+		});
+		while (employeeAdditionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
 	public void deleteEmployee(String name) throws PayrollServiceException {
 		int result = employeePayrollDBService.deleteEmployeeData(name);
 		if (result == 0)
