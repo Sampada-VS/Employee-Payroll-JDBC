@@ -140,5 +140,4 @@ public class EmployeePayrollJDBCService {
 	public long countEntries(IOService ioService) {
 		return employeePayrollList.size();
 	}
-
 }
