@@ -36,6 +36,31 @@ public class EmployeePayrollJDBCService {
 			employeePayrollData.salary = salary;
 	}
 
+	public void updateEmployeeSalaryWithThreads(Map<String, Double> arrayOfEmployeeSalary) {
+		Map<Integer, Boolean> employeeUpdationStatus = new HashMap<Integer, Boolean>();
+		Map<String, Double> employeeSalaryMap=arrayOfEmployeeSalary;
+		employeeSalaryMap.forEach((empName, empSalary) -> {
+			Runnable task = () -> {
+				employeeUpdationStatus.put(empName.hashCode(), false);
+				try {
+					this.updateEmployeeSalary(empName, empSalary);
+				} catch (PayrollServiceException e) {
+					e.printStackTrace();
+				}
+				employeeUpdationStatus.put(empName.hashCode(), true);
+			};
+			Thread thread = new Thread(task, empName);
+			thread.start();
+		});
+		while (employeeUpdationStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
+
+	}
+
 	private EmployeePayrollData getEmployeePayrollData(String name) {
 		EmployeePayrollData employeePayrollData;
 		employeePayrollData = this.employeePayrollList.stream().filter(dataItem -> dataItem.name.equals(name))
@@ -108,8 +133,8 @@ public class EmployeePayrollJDBCService {
 			Runnable task = () -> {
 				employeeAdditionStatus.put(employeeData.hashCode(), false);
 				try {
-					this.addEmployeeToPayroll(employeeData.name, employeeData.department,
-							employeeData.gender, employeeData.salary, employeeData.startDate);
+					this.addEmployeeToPayroll(employeeData.name, employeeData.department, employeeData.gender,
+							employeeData.salary, employeeData.startDate);
 				} catch (PayrollServiceException e) {
 					e.printStackTrace();
 				}
@@ -130,10 +155,10 @@ public class EmployeePayrollJDBCService {
 		int result = employeePayrollDBService.deleteEmployeeData(name);
 		if (result == 0)
 			return;
-
 	}
 
 	public long countEntries(IOService ioService) {
 		return employeePayrollList.size();
 	}
+
 }

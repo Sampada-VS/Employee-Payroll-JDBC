@@ -6,7 +6,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,14 +39,25 @@ public class EmployeePayrollJDBCServiceTest {
 				new EmployeePayrollData(0, "Mark", "Marketing", "M", 5000000.00, LocalDate.now()) };
 		EmployeePayrollJDBCService employeePayrollJDBCService = new EmployeePayrollJDBCService();
 		employeePayrollJDBCService.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
-		Instant start = Instant.now();
-		employeePayrollJDBCService.addEmployeeToPayroll(Arrays.asList(arrayOfEmployees));
-		Instant end = Instant.now();
-		System.out.println("Duration without thread :" + Duration.between(start, end));
-		Instant threadStart=Instant.now();
+		Instant threadStart = Instant.now();
 		employeePayrollJDBCService.addEmployeeToPayrollWithThreads(Arrays.asList(arrayOfEmployees));
-		Instant threadEnd=Instant.now();
-		System.out.println("Duration with thread :"+ Duration.between(threadStart, threadEnd));
-		assertEquals(9,employeePayrollJDBCService.countEntries(EmployeePayrollJDBCService.IOService.DB_IO));
+		Instant threadEnd = Instant.now();
+		System.out.println("Duration with thread :" + Duration.between(threadStart, threadEnd));
+		assertEquals(5, employeePayrollJDBCService.countEntries(EmployeePayrollJDBCService.IOService.DB_IO));
+	}
+
+	@Test
+	public void givenFourEmployeeSalary_WhenUpdated_ShouldMatch() throws PayrollServiceException {
+		Map<String, Double> arrayOfEmployeeSalary = new HashMap<String, Double>();
+		arrayOfEmployeeSalary.put("Bill", 2000000.00);
+		arrayOfEmployeeSalary.put("Terrisa", 3000000.00);
+		arrayOfEmployeeSalary.put("Charlie", 4000000.00);
+		arrayOfEmployeeSalary.put("Mark", 6000000.00);
+		employeePayrollData = employeePayrollJDBCService
+				.readEmployeePayrollDataFromDB(EmployeePayrollJDBCService.IOService.DB_IO);
+		employeePayrollJDBCService.updateEmployeeSalaryWithThreads(arrayOfEmployeeSalary);
+		boolean result = employeePayrollJDBCService.checkEmployeePayrollSyncWithDB("Mark");
+		assertTrue(result);
+		System.out.println("Salary got updated for Mark.");
 	}
 }

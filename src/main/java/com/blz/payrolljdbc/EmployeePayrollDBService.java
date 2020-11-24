@@ -17,7 +17,7 @@ import java.sql.Connection;
 import java.sql.Date;
 
 public class EmployeePayrollDBService {
-	private int connectionCounter=0;
+	private int connectionCounter = 0;
 	private static EmployeePayrollDBService employeePayrollDBService;
 	private PreparedStatement employeeDataStatement;
 
@@ -35,10 +35,12 @@ public class EmployeePayrollDBService {
 		connectionCounter++;
 		Connection connection;
 		String[] dbInfo = dbProperties();
-		System.out.println("Processing thread: "+Thread.currentThread().getName()+" Connecting to DB with Id: "+connectionCounter);
+		System.out.println("Processing thread: " + Thread.currentThread().getName() + " Connecting to DB with Id: "
+				+ connectionCounter);
 		connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/payroll_service?useSSL=false", dbInfo[0],
 				dbInfo[1]);
-		System.out.println("Processing thread: "+Thread.currentThread().getName()+" Id: "+connectionCounter+" Connection is successful.."+connection);
+		System.out.println("Processing thread: " + Thread.currentThread().getName() + " Id: " + connectionCounter
+				+ " Connection is successful.." + connection);
 		return connection;
 	}
 
@@ -112,12 +114,32 @@ public class EmployeePayrollDBService {
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setDouble(1, salary);
 			preparedStatement.setString(2, name);
+			int id=this.getEmployeeId(name);	
+			String query = String.format("UPDATE payroll_details SET BasicPay=%.2f WHERE EmployeeId='%s';", salary, id);
+			try (Statement statement = connection.createStatement()) {
+				statement.executeUpdate(query);
+			} catch (SQLException e) {
+				throw new PayrollServiceException(e.getMessage());
+			}
 			return preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
 		}
 	}
-
+	public int getEmployeeId(String name) throws PayrollServiceException {
+		String sql = String.format("SELECT EmployeeId FROM employee_payroll WHERE EmployeeName='%s';", name);
+		try (Connection connection = getConnect()) {
+			Statement statement = connection.createStatement();
+			ResultSet resultSet=statement.executeQuery(sql);
+			int id = 0;
+			while (resultSet.next()) {
+				id = resultSet.getInt("EmployeeId");
+			}
+			return id;
+		} catch (SQLException e) {
+			throw new PayrollServiceException(e.getMessage());
+		}
+	}
 	public int updateEmployeeDataUsingStatement(String name, double salary) throws PayrollServiceException {
 		String sql = String.format("UPDATE employee_payroll SET Salary=%.2f WHERE EmployeeName='%s';", salary, name);
 		try (Connection connection = getConnect()) {
@@ -236,8 +258,8 @@ public class EmployeePayrollDBService {
 	public EmployeePayrollData addEmployeeToPayroll(String name, String department, String gender, double salary,
 			LocalDate startDate) throws PayrollServiceException {
 		int employeeId = -1;
-		Connection connection =null;
-		EmployeePayrollData employeePayrollData =null;
+		Connection connection = null;
+		EmployeePayrollData employeePayrollData = null;
 		try {
 			connection = this.getConnect();
 			connection.setAutoCommit(false);
@@ -267,9 +289,9 @@ public class EmployeePayrollDBService {
 			double incomeTax = taxablePay * 0.1;
 			double netPay = salary - incomeTax;
 			String sql = String.format(
-					"INSERT INTO payroll_details (EmployeeId,BasicPay,Deductions,TaxablePay,IncomeTax,NetPay) VALUES (%s,%s,%s,%s,%s,%s)",
-					employeeId, salary, deductions, taxablePay, incomeTax, netPay);
-			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+						"INSERT INTO payroll_details (EmployeeId,BasicPay,Deductions,TaxablePay,IncomeTax,NetPay) VALUES (%s,%s,%s,%s,%s,%s)",
+						employeeId, salary, deductions, taxablePay, incomeTax, netPay);
+			int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);	
 			if (rowAffected == 1)
 				employeePayrollData = new EmployeePayrollData(employeeId, name, department, gender, salary, startDate);
 		} catch (SQLException e) {
@@ -293,5 +315,4 @@ public class EmployeePayrollDBService {
 		}
 		return employeePayrollData;
 	}
-
 }
