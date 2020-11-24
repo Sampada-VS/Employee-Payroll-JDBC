@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.Date;
 
 public class EmployeePayrollDBService {
+	private int connectionCounter=0;
 	private static EmployeePayrollDBService employeePayrollDBService;
 	private PreparedStatement employeeDataStatement;
 
@@ -30,11 +31,14 @@ public class EmployeePayrollDBService {
 		return employeePayrollDBService;
 	}
 
-	private static Connection getConnect() throws SQLException {
+	private synchronized Connection getConnect() throws SQLException {
+		connectionCounter++;
 		Connection connection;
 		String[] dbInfo = dbProperties();
+		System.out.println("Processing thread: "+Thread.currentThread().getName()+" Connecting to DB with Id: "+connectionCounter);
 		connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/payroll_service?useSSL=false", dbInfo[0],
 				dbInfo[1]);
+		System.out.println("Processing thread: "+Thread.currentThread().getName()+" Id: "+connectionCounter+" Connection is successful.."+connection);
 		return connection;
 	}
 
@@ -232,10 +236,10 @@ public class EmployeePayrollDBService {
 	public EmployeePayrollData addEmployeeToPayroll(String name, String department, String gender, double salary,
 			LocalDate startDate) throws PayrollServiceException {
 		int employeeId = -1;
-		Connection connection = null;
-		EmployeePayrollData employeePayrollData = null;
+		Connection connection =null;
+		EmployeePayrollData employeePayrollData =null;
 		try {
-			connection = getConnect();
+			connection = this.getConnect();
 			connection.setAutoCommit(false);
 		} catch (SQLException e) {
 			throw new PayrollServiceException(e.getMessage());
@@ -255,7 +259,6 @@ public class EmployeePayrollDBService {
 				connection.rollback();
 				return employeePayrollData;
 			} catch (SQLException e1) {
-				throw new PayrollServiceException(e1.getMessage());
 			}
 		}
 		try (Statement statement = connection.createStatement()) {
@@ -275,7 +278,6 @@ public class EmployeePayrollDBService {
 			} catch (SQLException e1) {
 				throw new PayrollServiceException(e1.getMessage());
 			}
-			throw new PayrollServiceException(e.getMessage());
 		}
 		try {
 			connection.commit();
@@ -291,4 +293,5 @@ public class EmployeePayrollDBService {
 		}
 		return employeePayrollData;
 	}
+
 }
